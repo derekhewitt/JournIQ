@@ -1,0 +1,23 @@
+$primary: #3E92CC;
+$success: #43AA8B;
+$dark: #0D1B2A;
+$light: #F9F9F9;
+$secondary: #B0BEC5;
+
+@import "../lib/bootstrap/scss/bootstrap";
+
+body {
+    background-color: $light;
+    color: $dark;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+a {
+    color: $primary;
+    text-decoration: none;
+
+    &:hover {
+        color: $success;
+        text-decoration: underline;
+    }
+}

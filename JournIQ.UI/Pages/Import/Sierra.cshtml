@@ -1,0 +1,56 @@
+﻿@page
+@model JournIQ.UI.Pages.Import.SierraModel
+@{
+    ViewData["Title"] = "Import from Sierra Chart";
+}
+
+<h2 class="mb-4">Import Trade Activity - Sierra Chart</h2>
+
+<form method="post" enctype="multipart/form-data" class="mb-4">
+    <div class="mb-3">
+        <label class="form-label">Select Trade Activity Log (.txt)</label>
+        <input type="file" name="UploadFile" accept=".txt" class="form-control" />
+    </div>
+    <button type="submit" class="btn btn-primary">Upload</button>
+</form>
+
+
+@if (Model.ParsedTrades?.Any() == true)
+{
+    <h5>Parsed Trades:</h5>
+    <table class="table table-bordered table-sm mt-3">
+        <thead class="table-light">
+            <tr>
+                <th>Date/Time</th>
+                <th>Symbol</th>
+                <th>Side</th>
+                <th>Order Type</th>
+                <th>Qty</th>
+                <th>Price</th>
+                <th>Open/Close</th>
+                <th>High</th>
+                <th>Low</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var trade in Model.ParsedTrades)
+        {
+            <tr>
+                <td>@trade.DateTime.ToString("g")</td>
+                <td>@trade.Symbol</td>
+                <td>@trade.BuySell</td>
+                <td>@trade.OrderType</td>
+                <td>@trade.Quantity</td>
+                <td>@trade.FillPrice</td>
+                <td>@trade.OpenClose</td>
+                <td>@trade.HighDuringPosition?.ToString("0.00")</td>
+                <td>@trade.LowDuringPosition?.ToString("0.00")</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    <form method="post" asp-page-handler="Import">
+        <button type="submit" class="btn btn-success">Confirm Import</button>
+    </form>
+
+}
