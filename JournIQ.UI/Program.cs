@@ -16,6 +16,8 @@ namespace JournIQ.UI
             builder.Services.AddScoped<ITradeRepository, TradeRepository>();
             builder.Services.AddScoped<ITagRepository, TagRepository>();
             builder.Services.AddScoped<ITradeImportService, TradeImportService>();
+            builder.Services.AddSingleton<ISierraTradeStagingService, SierraTradeStagingService>();
+
 
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
             builder.Services.AddDbContext<DataContext>(options =>

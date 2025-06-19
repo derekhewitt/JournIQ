@@ -1,4 +1,7 @@
-﻿namespace JournalIQ.Core
+﻿using JournalIQ.Core.Models;
+using System.Drawing;
+
+namespace JournalIQ.Core
 {
     public class Trade
     {
@@ -13,6 +16,30 @@
         public string Notes { get; set; }
         public decimal? HighDuringPosition { get; set; }
         public decimal? LowDuringPosition { get; set; }
+        public decimal PnL
+        {
+            get
+            {
+                if (!ExitPrice.HasValue)
+                    return 0;
+
+                var tickValue = FuturesContractSpecs.GetTickValue(Symbol);
+                var tickSize = FuturesContractSpecs.GetTickSize(Symbol);
+
+                if (tickValue == 0 || tickSize == 0)
+                    return 0;
+
+                var priceDifference = Direction == "Buy"
+                    ? ExitPrice.Value - EntryPrice
+                    : EntryPrice - ExitPrice.Value;
+
+                var tickCount = priceDifference / tickSize;
+
+                return tickCount * tickValue * Quantity;
+            }
+        }
+
+
 
         public List<TradeTag> TradeTags { get; set; } = new();
     }

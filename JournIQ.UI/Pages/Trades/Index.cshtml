@@ -1,0 +1,87 @@
+﻿@page
+@model JournIQ.UI.Pages.Trades.IndexModel
+@{
+    ViewData["Title"] = "Trade Log";
+    var overallPnL = Model.GroupedTrades.Sum(g => g.DailyPnL);
+}
+
+<h2 class="mb-4">Trade Log</h2>
+
+<div class="alert alert-secondary d-flex justify-content-between align-items-center">
+    <strong>Total PnL:</strong>
+    <span class="fw-bold @(overallPnL >= 0 ? "text-success" : "text-danger")">
+        @overallPnL.ToString("C")
+    </span>
+</div>
+
+<form method="get" class="mb-3 row">
+    <div class="col-md-3">
+        <input asp-for="SymbolFilter" class="form-control" placeholder="Filter by Symbol" />
+    </div>
+    <div class="col-md-3">
+        <input asp-for="StartDate" class="form-control" type="date" />
+    </div>
+    <div class="col-md-3">
+        <input asp-for="EndDate" class="form-control" type="date" />
+    </div>
+    <div class="col-md-3">
+        <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+    </div>
+</form>
+
+@foreach (var group in Model.GroupedTrades)
+{
+    <div class="card my-3">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <strong>@group.Date.ToString("MMM dd, yyyy")</strong>
+            <span>
+                Daily PnL: <strong class="@(group.DailyPnL >= 0 ? "text-success" : "text-danger")">
+                    @group.DailyPnL.ToString("C")
+                </strong>
+            </span>
+        </div>
+        <table class="table table-sm mb-0">
+            <thead class="table-secondary">
+                <tr>
+                    <th>Time In</th>
+                    <th>Time Out</th>
+                    <th>Symbol</th>
+                    <th>Side</th>
+                    <th>Qty</th>
+                    <th>Entry</th>
+                    <th>Exit</th>
+                    <th>PnL</th>
+                    <th>Tags</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var trade in group.Trades)
+                {
+                    <tr>
+                        <td>@trade.EntryTime.ToShortTimeString()</td>
+                        <td>@trade.ExitTime.Value.ToShortTimeString()</td>
+                        <td>@trade.Symbol</td>
+                        <td class="fw-bold text-@((trade.Direction == "Long") ? "success" : "danger")">
+                            @trade.Direction
+                        </td>
+                        <td>@trade.Quantity</td>
+                        <td>@trade.EntryPrice</td>
+                        <td>@trade.ExitPrice</td>
+                        <td class="@(trade.PnL >= 0 ? "text-success" : "text-danger")">
+                            @trade.PnL.ToString("C")
+                        </td>
+                        <td>
+                            @if (trade.TradeTags != null && trade.TradeTags.Any())
+                            {
+                                @foreach (var tag in trade.TradeTags)
+                                {
+                                    <span class="badge bg-info text-dark me-1">@tag</span>
+                                }
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
