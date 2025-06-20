@@ -24,9 +24,15 @@ public class IndexModel : PageModel
 
     public List<TradeDayGroup> GroupedTrades { get; set; } = new();
 
-    public async Task OnGetAsync()
+    public async Task OnGetAsync(DateTime? date)
     {
         var trades = await _tradeRepository.GetAllAsync();
+
+        if (date.HasValue)
+        {
+            StartDate = date;
+            EndDate = date;
+        }
 
         if (!string.IsNullOrWhiteSpace(SymbolFilter))
         {

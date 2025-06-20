@@ -1,10 +1,156 @@
 ﻿@page
 @model IndexModel
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<style>
+    .calendar {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.25rem;
+    }
+
+    .day-tile {
+        border-radius: 0.75rem;
+        padding: 0.5rem;
+        min-height: 100px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        border: 1px solid #dee2e6;
+        transition: transform 0.1s ease;
+        background-color: #f8f9fa;
+    }
+
+        .day-tile:hover {
+            transform: scale(1.02);
+            cursor: pointer;
+        }
+
+    .day-tile-link {
+        display: block;
+        color: inherit;
+    }
+
+        .day-tile-link:hover .day-tile {
+            transform: scale(1.02);
+            box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .day-tile-link:hover,
+        .day-tile-link:hover * {
+            color: inherit !important;
+        }
+
+
+    .day-number {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #999;
+    }
+
+    .week-summary {
+        min-width: 130px;
+        margin-left: 1rem;
+        padding: 0.75rem;
+        font-size: 0.85rem;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 0.75rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-end;
+        text-align: right;
+    }
+
+    .day-empty {
+        background-color: #e7ebef !important;
+    }
+</style>
+
+@{
+    var weekIndex = 1;
+}
+@foreach (var week in Model.CalendarWeeks)
+{
+    <div class="d-flex mb-1">
+        <div class="calendar flex-grow-1">
+            @foreach (var day in week.Days)
+            {
+                var hasTrades = day.Trades.Any();
+                var pnlClass = hasTrades
+                ? day.TotalPnL > 0 ? "bg-success bg-opacity-25"
+                : day.TotalPnL < 0 ? "bg-danger bg-opacity-25" : "bg-light"
+                : "day-empty text-muted";
+
+                <a href="/Trades/Index?date=@day.Date.ToString("yyyy-MM-dd")" class="day-tile-link text-decoration-none">
+                    <div class="day-tile @pnlClass">
+                        <div class="day-number">@day.Date.Day</div>
+
+                        @if (hasTrades)
+                        {
+                            <div class="fw-bold fs-5 day-pnl" data-amount="@day.TotalPnL">
+                                @day.TotalPnL.ToString("C")
+                            </div>
+                            <div>@day.TradeCount trade(s)</div>
+                            <div>@day.AvgEfficiency().ToString("F0")% eff</div>
+                        }
+                    </div>
+                </a>
+            }
+        </div>
+
+        <!-- Weekly Summary -->
+        <div class="week-summary">
+            <div class="fw-bold text-muted">Week @weekIndex</div>
+            @{
+                var weeklyPnlClass = week.WeeklyPnL > 0 ? "text-success"
+                : week.WeeklyPnL < 0 ? "text-danger"
+                : "text-muted";
+            }
+            <div class="fw-bold fs-4 @weeklyPnlClass weekly-pnl" data-amount="@week.WeeklyPnL">
+                $0.00
+            </div>
+
+            <div class="text-muted small">@week.WeeklyTradeCount trade(s)</div>
+        </div>
+    </div>
+    weekIndex++;
+}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        function animatePnL(selector) {
+            document.querySelectorAll(selector).forEach(el => {
+                const end = parseFloat(el.dataset.amount);
+                let current = 0;
+                const isNegative = end < 0;
+                const absEnd = Math.abs(end);
+                const step = absEnd / 60;
+
+                function update() {
+                    current += step;
+                    if (current >= absEnd) {
+                        el.textContent = (isNegative ? '-' : '') +
+                            absEnd.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+                        return;
+                    }
+
+                    el.textContent = (isNegative ? '-' : '') +
+                        current.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+                    requestAnimationFrame(update);
+                }
+
+                update();
+            });
+        }
+
+        animatePnL('.weekly-pnl');
+        //animatePnL('.day-pnl');
+    });
+</script>
+
+
