@@ -54,6 +54,15 @@ public class IndexModel : PageModel
             .OrderByDescending(g => g.Date)
             .ToList();
     }
+
+    public string GetEfficiencyColor(decimal? efficiency)
+    {
+        if (!efficiency.HasValue) return "text-muted";
+        if (efficiency >= 80) return "text-success";
+        if (efficiency >= 50) return "text-primary";
+        if (efficiency >= 20) return "text-warning";
+        return "text-danger";
+    }
 }
 
 public class TradeDayGroup

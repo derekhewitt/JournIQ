@@ -49,7 +49,11 @@
                     <th>Side</th>
                     <th>Qty</th>
                     <th>Entry</th>
+                    <th>Entry Efficiency</th>
                     <th>Exit</th>
+                    <th>Exit Efficiency</th>
+                    <th>Max Open Profit</th>
+                    <th>Max Open Loss</th>
                     <th>PnL</th>
                     <th>Tags</th>
                 </tr>
@@ -66,8 +70,20 @@
                         </td>
                         <td>@trade.Quantity</td>
                         <td>@trade.EntryPrice</td>
+                        <td class="@Model.GetEfficiencyColor(trade.EntryEfficiency)">
+                            @trade.EntryEfficiency?.ToString("F0")%
+                        </td>
                         <td>@trade.ExitPrice</td>
-                        <td class="@(trade.PnL >= 0 ? "text-success" : "text-danger")">
+                        <td class="@Model.GetEfficiencyColor(trade.ExitEfficiency)">
+                            @trade.ExitEfficiency?.ToString("F0")%
+                        </td>
+                        <td class="text-success">
+                            @trade.MaxOpenProfit.ToString("C")
+                        </td>
+                        <td class="text-danger">
+                            @trade.MaxOpenLoss.ToString("C")
+                        </td>
+                        <td class="fw-bold @(trade.PnL >= 0 ? "text-success" : "text-danger")">
                             @trade.PnL.ToString("C")
                         </td>
                         <td>
