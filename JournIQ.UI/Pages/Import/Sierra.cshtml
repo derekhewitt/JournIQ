@@ -22,6 +22,7 @@
         <thead class="table-light">
             <tr>
                 <th>Date/Time</th>
+                <th>InternalOrderId</th>
                 <th>Symbol</th>
                 <th>Side</th>
                 <th>Order Type</th>
@@ -37,6 +38,7 @@
         {
             <tr>
                 <td>@trade.DateTime.ToString("g")</td>
+                <td>@trade.InternalOrderId</td>
                 <td>@trade.Symbol</td>
                 <td>@trade.BuySell</td>
                 <td>@trade.OrderType</td>

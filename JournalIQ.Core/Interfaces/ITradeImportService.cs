@@ -3,7 +3,7 @@ namespace JournalIQ.Core
 {
     public interface ITradeImportService
     {
-        Task ImportSierraTradesAsync(List<SierraTradeRow> parsedTrades);
+        Task<(int imported, int duplicates)> ImportSierraTradesAsync(List<SierraTradeRow> parsedTrades);
     }
 
 }

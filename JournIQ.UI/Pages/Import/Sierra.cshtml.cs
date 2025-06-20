@@ -45,10 +45,10 @@ public class SierraModel : PageModel
             return RedirectToPage();
         }
 
-        await _importService.ImportSierraTradesAsync(trades);
+        var (imported, duplicates) = await _importService.ImportSierraTradesAsync(trades);
         _stagingService.Clear("guest");
 
-        TempData["Success"] = $"{trades.Count} trades imported successfully.";
+        TempData["Success"] = $"{imported} trades imported successfully. {duplicates} duplicates skipped.";
         return RedirectToPage("/Index");
     }
 
@@ -63,11 +63,6 @@ public class SierraModel : PageModel
                 continue;
 
             var parts = line.Split('\t');
-            System.Diagnostics.Debug.WriteLine("---- Parsed Row ----");
-            for (int i = 0; i < parts.Length; i++)
-            {
-                System.Diagnostics.Debug.WriteLine($"[{i}] = {parts[i]}");
-            }
 
             trades.Add(new SierraTradeRow
             {
@@ -78,6 +73,7 @@ public class SierraModel : PageModel
                 BuySell = parts[9],
                 FillPrice = decimal.TryParse(parts[13], out var fp) ? fp : 0,
                 OpenClose = parts[16],
+                InternalOrderId = long.TryParse(parts[5], out var orderId) ? orderId : 0,
                 HighDuringPosition = parts.Length > 20 && decimal.TryParse(parts[20], out var high) ? high : null,
                 LowDuringPosition = parts.Length > 21 && decimal.TryParse(parts[21], out var low) ? low : null
             });

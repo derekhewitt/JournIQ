@@ -19,11 +19,17 @@ namespace JournalIQ.Core
             _tagRepo = tagRepo;
         }
 
-        public async Task ImportSierraTradesAsync(List<SierraTradeRow> parsedTrades)
+        public async Task<(int imported, int duplicates)> ImportSierraTradesAsync(List<SierraTradeRow> parsedTrades)
         {
             var sierraTag = await _tagRepo.GetOrCreateAsync("sierra");
 
-            var trades = ConvertToTrades(parsedTrades);
+            var existingIds = await _tradeRepo.GetInternalOrderIdsAsync();
+
+            var tradesToAdd = parsedTrades
+                .Where(t => !existingIds.Contains(t.InternalOrderId))
+                .ToList();
+
+            var trades = ConvertToTrades(tradesToAdd);
 
             foreach (var trade in trades)
             {
@@ -32,6 +38,10 @@ namespace JournalIQ.Core
             }
            
             await _tradeRepo.SaveAsync();
+
+            var imported = trades.Count();
+            var duplicates = parsedTrades.Where(t => existingIds.Contains(t.InternalOrderId)).Count();
+            return (imported, duplicates);
         }
 
         public List<Trade> ConvertToTrades(List<SierraTradeRow> fills)
@@ -59,6 +69,7 @@ namespace JournalIQ.Core
                         Direction = entry.BuySell.Equals("Buy", StringComparison.OrdinalIgnoreCase) ? "Long" : "Short",
                         Quantity = entry.Quantity, // assumes 1:1 match
                         Notes = $"Imported from Sierra on {DateTime.UtcNow:yyyy-MM-dd HH:mm}",
+                        InternalOrderId = entry.InternalOrderId, //uses open position orderId, not close - but that's okay.
                         HighDuringPosition = fill.HighDuringPosition,
                         LowDuringPosition = fill.LowDuringPosition,
                     };

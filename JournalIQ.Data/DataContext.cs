@@ -19,6 +19,10 @@ public class DataContext : DbContext
             .HasOne(tt => tt.Tag)
             .WithMany(t => t.TradeTags)
             .HasForeignKey(tt => tt.TagId);
+
+        modelBuilder.Entity<Trade>()
+            .HasIndex(t => t.InternalOrderId)
+            .IsUnique();
     }
 
     public DbSet<Trade> Trades { get; set; }

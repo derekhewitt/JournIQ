@@ -15,6 +15,7 @@ namespace JournalIQ.Core
         public string BuySell { get; set; }
         public decimal FillPrice { get; set; }
         public string OpenClose { get; set; }
+        public long InternalOrderId { get; set; }
         public decimal? HighDuringPosition { get; set; }
         public decimal? LowDuringPosition { get; set; }
     }

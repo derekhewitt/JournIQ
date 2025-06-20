@@ -25,6 +25,13 @@ namespace JournalIQ.Data
         public Task<List<Trade>> GetAllAsync() => _context.Trades.ToListAsync();
 
         public Task SaveAsync() => _context.SaveChangesAsync();
+
+        public async Task<List<long>> GetInternalOrderIdsAsync()
+        {
+            return await _context.Trades
+                .Select(t => t.InternalOrderId)
+                .ToListAsync();
+        }
     }
 
 }
