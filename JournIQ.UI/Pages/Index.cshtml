@@ -69,50 +69,81 @@
     .day-empty {
         background-color: #e7ebef !important;
     }
-</style>
 
-<div class="row mb-4">
-    <div class="col-md-2">
-        <div class="card text-center shadow-sm">
-            <div class="card-body">
-                <h6 class="text-muted">Net P&L</h6>
-                <h4 class="fw-bold text-primary">@Model.TotalNetPnL.ToString("C")</h4>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-2">
-        <div class="card text-center shadow-sm">
-            <div class="card-body">
-                <h6 class="text-muted">Profit Factor</h6>
-                <h4 class="fw-bold">@Model.ProfitFactor.ToString("F2")</h4>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-2">
-        <div class="card text-center shadow-sm">
-            <div class="card-body">
-                <h6 class="text-muted">Wins vs Losses</h6>
-                <h4 class="fw-bold">@Model.TotalWins / @Model.TotalLosses</h4>
-            </div>
+/*     canvas {
+        height: 60px !important;
+    } */
+</style>
+<div class="row mb-4 g-3">
+    <div class="col-md-3">
+        <div class="card text-center p-3 h-100">
+            <div class="text-muted">Total PnL</div>
+            <h4>@Model.TotalNetPnL.ToString("C")</h4>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-center shadow-sm">
-            <div class="card-body">
-                <h6 class="text-muted">Trade Expectancy</h6>
-                <h4 class="fw-bold">@Model.Expectancy.ToString("C")</h4>
-            </div>
+        <div class="card text-center p-3 h-100">
+            <div class="text-muted">Profit Factor</div>
+            <h4>@Model.ProfitFactor.ToString("F2")</h4>
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card text-center shadow-sm">
-            <div class="card-body">
-                <h6 class="text-muted">Win %</h6>
-                <h4 class="fw-bold">@Model.WinRate.ToString("P0")</h4>
+        <div class="card text-center p-3 h-100">
+            <div class="text-muted">Expectancy</div>
+            <h4>@Model.Expectancy.ToString("F2")</h4>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3 h-100 d-flex flex-row align-items-center justify-content-between">
+            <div style="width: 70px; height: 70px;">
+                <canvas id="winLossChart"></canvas>
+            </div>
+            <div class="ms-3 text-end">
+                <div class="text-muted small">Win vs Loss</div>
+                <div class="fw-bold small">
+                    @Model.TotalWins / @Model.TotalLosses
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<div class="row mb-4 g-3">
+    <div class="col-md-3">
+        <div class="card text-center p-3 h-100">
+            <div class="text-muted">Largest Win</div>
+            <h5 class="text-success">@Model.LargestWin.ToString("C")</h5>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center p-3 h-100">
+            <div class="text-muted">Largest Loss</div>
+            <h5 class="text-danger">@Model.LargestLoss.ToString("C")</h5>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center p-3 h-100">
+            <div class="text-muted">Avg Duration</div>
+            <h5>@Model.AvgDurationMinutes.ToString("F1") min</h5>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3 h-100 d-flex flex-row align-items-center justify-content-between">
+            <div style="width: 70px; height: 70px;">
+                <canvas id="winRateChart"></canvas>
+            </div>
+            <div class="ms-3 text-end">
+                <div class="text-muted small">Win %</div>
+                <div class="fw-bold small">
+                    @((Model.WinRate * 100).ToString("F0"))%
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
 
 
 @{
@@ -167,6 +198,49 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
+
+        const winLossCtx = document.getElementById('winLossChart').getContext('2d');
+        new Chart(winLossCtx, {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    data: [@Model.TotalWins, @Model.TotalLosses],
+                    backgroundColor: ['#198754', '#dc3545'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false }
+                }
+            }
+        });
+
+        const winRateCtx = document.getElementById('winRateChart').getContext('2d');
+        new Chart(winRateCtx, {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    data: [@(Model.WinRate * 100), @(100 - Model.WinRate * 100)],
+                    backgroundColor: ['#198754', '#dee2e6'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '70%',
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false }
+                }
+            }
+        });
+
         function animatePnL(selector) {
             document.querySelectorAll(selector).forEach(el => {
                 const end = parseFloat(el.dataset.amount);
