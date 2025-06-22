@@ -71,6 +71,50 @@
     }
 </style>
 
+<div class="row mb-4">
+    <div class="col-md-2">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h6 class="text-muted">Net P&L</h6>
+                <h4 class="fw-bold text-primary">@Model.TotalNetPnL.ToString("C")</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h6 class="text-muted">Profit Factor</h6>
+                <h4 class="fw-bold">@Model.ProfitFactor.ToString("F2")</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h6 class="text-muted">Wins vs Losses</h6>
+                <h4 class="fw-bold">@Model.TotalWins / @Model.TotalLosses</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h6 class="text-muted">Trade Expectancy</h6>
+                <h4 class="fw-bold">@Model.Expectancy.ToString("C")</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center shadow-sm">
+            <div class="card-body">
+                <h6 class="text-muted">Win %</h6>
+                <h4 class="fw-bold">@Model.WinRate.ToString("P0")</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 @{
     var weekIndex = 1;
 }
