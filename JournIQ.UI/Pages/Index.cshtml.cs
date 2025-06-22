@@ -21,6 +21,9 @@ namespace JournIQ.UI.Pages
         public decimal LargestWin { get; set; }
         public decimal LargestLoss { get; set; }
         public double AvgDurationMinutes { get; set; }
+        public decimal AvgWin { get; set; }
+        public decimal AvgLoss { get; set; }
+        public List<(DateTime Date, decimal PnL)> RecentDaysPnL { get; set; }
 
 
         public IndexModel(ILogger<IndexModel> logger, ITradeRepository tradeRepository)
@@ -54,29 +57,30 @@ namespace JournIQ.UI.Pages
                 LargestWin = wins.Any() ? wins.Max(t => t.PnL) : 0;
                 LargestLoss = losses.Any() ? losses.Min(t => t.PnL) : 0;
 
+                AvgWin = wins.Count > 0 ? wins.Average(t => t.PnL) : 0;
+                AvgLoss = losses.Count > 0 ? losses.Average(t => t.PnL) : 0;
+
                 AvgDurationMinutes = allTrades
                     .Where(t => t.EntryTime != null && t.ExitTime != null)
                     .Select(t => (t.ExitTime.Value - t.EntryTime).TotalMinutes)
                     .DefaultIfEmpty(0)
                     .Average();
+
+                var pnlByDate = allTrades
+                .GroupBy(t => t.EntryTime.Date)
+                .ToDictionary(g => g.Key, g => g.Sum(t => t.PnL));
+
+                // Get last 14 *weekdays* (excluding Sat/Sun), even if no trades
+                RecentDaysPnL = Enumerable.Range(0, 30) // scan 30 calendar days back
+                    .Select(offset => DateTime.Today.AddDays(-offset))
+                    .Where(date => date.DayOfWeek != DayOfWeek.Saturday && date.DayOfWeek != DayOfWeek.Sunday)
+                    .Take(21)
+                    .Select(date => (date, pnlByDate.TryGetValue(date, out var pnl) ? pnl : 0m))
+                    .Reverse()
+                    .ToList();
+
             }
-            //TotalNetPnL = allTrades.Sum(t => t.PnL);
 
-            //var winningTrades = allTrades.Where(t => t.PnL > 0).ToList();
-            //var losingTrades = allTrades.Where(t => t.PnL < 0).ToList();
-
-            //TotalWins = winningTrades.Count;
-            //TotalLosses = losingTrades.Count;
-
-            //var grossProfit = winningTrades.Sum(t => t.PnL);
-            //var grossLoss = -losingTrades.Sum(t => t.PnL); // Convert to positive for calculation
-
-            //ProfitFactor = grossLoss > 0 ? (double)(grossProfit / grossLoss) : 0;
-
-            //var avgWin = winningTrades.Any() ? winningTrades.Average(t => t.PnL) : 0;
-            //var avgLoss = losingTrades.Any() ? -losingTrades.Average(t => t.PnL) : 0;
-
-            //Expectancy = (decimal)(WinRate * (double)avgWin - (1 - WinRate) * (double)avgLoss);
 
             // == Calendar Logic ==
             var groupedByDay = allTrades
